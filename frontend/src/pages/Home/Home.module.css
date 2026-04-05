@@ -1,0 +1,151 @@
+.page {
+  min-height: 100vh;
+  background: var(--parch);
+}
+
+.hero {
+  padding: 52px 60px 36px;
+  background: var(--sidebar);
+  text-align: center;
+}
+
+.heroSub {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.heroTitle {
+  font-family: 'Georgia', serif;
+  font-size: 38px;
+  color: var(--s-text);
+  line-height: 1.25;
+  margin-bottom: 14px;
+  font-weight: normal;
+}
+
+.heroDesc {
+  font-size: 14px;
+  color: var(--s-muted);
+  max-width: 420px;
+  margin: 0 auto 28px;
+  line-height: 1.7;
+}
+
+.searchBar {
+  display: flex;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--parch);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  font-family: inherit;
+}
+
+.searchSelect {
+  border: none;
+  border-left: 1px solid var(--border);
+  background: var(--parch-dark);
+  padding: 11px 10px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.searchBtn {
+  border: none;
+  background: var(--gold);
+  padding: 11px 18px;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 500;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.searchBtn:hover {
+  background: var(--gold-light);
+}
+
+.genreRow {
+  display: flex;
+  gap: 8px;
+  padding: 14px 32px;
+  flex-wrap: wrap;
+  background: var(--sidebar);
+  border-bottom: 1px solid #2e2214;
+}
+
+.pill {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid #3a2e1e;
+  color: var(--s-muted);
+  background: transparent;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.pill:hover {
+  color: var(--s-text);
+  border-color: var(--s-muted);
+}
+
+.pillActive {
+  background: var(--gold-pale);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.body {
+  padding: 28px 32px;
+}
+
+.sectionTitle {
+  font-family: 'Georgia', serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sectionTitle::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 14px;
+  padding: 60px 0;
+}

@@ -1,0 +1,35 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--parch);
+}
+:root {
+  --ink: #1a1209;
+  --ink-mid: #3d3020;
+  --ink-soft: #7a6a54;
+  --parch: #fdf8f0;
+  --parch-dark: #f5edd8;
+  --gold: #c8922a;
+  --gold-light: #e8b84b;
+  --gold-pale: #fdf0d0;
+  --seal: #8b2020;
+  --sidebar: #1a1209;
+  --s-text: #e8d9b8;
+  --s-muted: #8a7a60;
+  --card: #fffdf7;
+  --border: #e8dcc8;
+  --green: #2a7a3e;
+  --green-bg: #eaf7ee;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+}
+
