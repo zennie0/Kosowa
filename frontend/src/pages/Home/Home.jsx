@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Navbar from '../../components/Navbar/Navbar'
 import StoryCard from '../../components/StoryCard/StoryCard'
-import dummyStories from '../../data/dummyStories'
+import dummyStories from '../../data/dummyStories.js'
 import styles from './Home.module.css'
 
 const genres = ['All', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi', 'Mystery', 'Thriller', 'Folklore', 'Drama', 'Comedy', 'Adventure']

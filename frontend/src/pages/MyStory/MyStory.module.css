@@ -1,0 +1,319 @@
+.page {
+  min-height: 100vh;
+  background: var(--parch);
+}
+
+.header {
+  background: var(--sidebar);
+  padding: 32px 40px;
+  border-bottom: 1px solid #2e2214;
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.genreTag {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.completedBadge {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: var(--gold-pale);
+  color: #8b5e1a;
+  font-weight: 500;
+}
+
+.title {
+  font-family: 'Georgia', serif;
+  font-size: 28px;
+  color: var(--s-text);
+  font-weight: normal;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--s-muted);
+  margin-bottom: 10px;
+}
+
+.desc {
+  font-size: 13px;
+  color: var(--s-muted);
+  line-height: 1.7;
+  max-width: 520px;
+  margin-bottom: 20px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btnComplete {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--green);
+  cursor: pointer;
+  background: var(--green-bg);
+  font-family: inherit;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.btnComplete:hover {
+  opacity: 0.85;
+}
+
+.btnDanger {
+  padding: 8px 16px;
+  border: 1px solid var(--seal);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--seal);
+  cursor: pointer;
+  background: transparent;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.btnDanger:hover {
+  background: #fff0f0;
+}
+
+/* MODAL */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px 32px;
+  max-width: 400px;
+  width: 90%;
+}
+
+.modalTitle {
+  font-family: 'Georgia', serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 10px;
+  font-weight: normal;
+}
+
+.modalDesc {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+}
+
+.btnCancel {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  background: transparent;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.btnCancel:hover {
+  background: var(--parch-dark);
+}
+
+/* BODY */
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 24px;
+  padding: 28px 40px;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+.paraList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.paraItem {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.paraHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.paraAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.paraName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ownerTag {
+  font-size: 10px;
+  color: var(--gold);
+  background: var(--gold-pale);
+  padding: 1px 7px;
+  border-radius: 8px;
+  font-weight: 400;
+}
+
+.paraTime {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.btnDelete {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--seal);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.btnDelete:hover {
+  background: #fff0f0;
+}
+
+.paraText {
+  font-family: 'Georgia', serif;
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+/* WRITERS PANEL */
+.writersPanel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.writersTitle {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+.writersList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.writerRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.writerRow:last-child {
+  border-bottom: none;
+}
+
+.writerAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.writerName {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.writerCount {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-left: auto;
+}
+
+.writerNew {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: var(--green-bg);
+  color: var(--green);
+  font-weight: 500;
+}

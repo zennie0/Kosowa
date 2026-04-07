@@ -1,0 +1,376 @@
+.page {
+  min-height: 100vh;
+  background: var(--parch);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) 240px;
+  min-height: calc(100vh - 57px);
+}
+
+/* LEFT */
+.left {
+  background: var(--parch-dark);
+  border-right: 1px solid var(--border);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.leftTitle {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.contribBox {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.contribTextarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px;
+  font-size: 12px;
+  color: var(--ink);
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  min-height: 110px;
+  line-height: 1.6;
+}
+
+.contribFooter {
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wordCount {
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+
+.wordOver {
+  color: var(--seal);
+  font-weight: 500;
+}
+
+.btnContribute {
+  border: none;
+  background: var(--ink);
+  color: var(--gold-light);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.btnContribute:hover {
+  opacity: 0.85;
+}
+
+.btnContribute:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.quotaNote {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  padding: 10px;
+  background: var(--gold-pale);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.infoBox {
+  background: var(--gold-pale);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.infoLabel {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.infoVal {
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.infoDesc {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.rules {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.rulesTitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  margin-bottom: 4px;
+}
+
+/* MIDDLE */
+.middle {
+  padding: 28px 32px;
+  overflow-y: auto;
+}
+
+.storyHeader {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.storyGenre {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.storyTitle {
+  font-family: 'Georgia', serif;
+  font-size: 26px;
+  color: var(--ink);
+  margin-bottom: 10px;
+  line-height: 1.2;
+  font-weight: normal;
+}
+
+.storyMeta {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.authorLink {
+  color: var(--gold);
+  cursor: pointer;
+}
+
+.authorLink:hover {
+  text-decoration: underline;
+}
+
+.paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.paraBlock {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.paraNew {
+  background: var(--green-bg);
+  border: 1px dashed #aad4b5;
+  border-radius: var(--radius-md);
+  padding: 16px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.paraAuthor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.paraAvatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.paraName {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ownerTag {
+  font-size: 10px;
+  color: var(--gold);
+  background: var(--gold-pale);
+  padding: 1px 7px;
+  border-radius: 8px;
+  font-weight: 400;
+}
+
+.paraTime {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.paraText {
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.9;
+}
+
+/* RIGHT */
+.right {
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.commentTitle {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.commentList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.comment {
+  padding: 10px 12px;
+  background: var(--parch);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.commentHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+
+.commentAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.commentName {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-mid);
+}
+
+.commentTime {
+  font-size: 10px;
+  color: var(--ink-soft);
+  margin-left: auto;
+}
+
+.commentText {
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.commentInputArea {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--parch);
+  overflow: hidden;
+  margin-top: auto;
+}
+
+.commentTextarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px;
+  font-size: 12px;
+  color: var(--ink);
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  min-height: 64px;
+  line-height: 1.6;
+}
+
+.commentInputFooter {
+  padding: 6px 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btnComment {
+  border: none;
+  background: var(--gold);
+  color: var(--ink);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.btnComment:hover {
+  background: var(--gold-light);
+}
+
+.btnComment:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
