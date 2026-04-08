@@ -1,0 +1,259 @@
+.page {
+  min-height: 100vh;
+  background: var(--parch);
+}
+
+.wrap {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  min-height: calc(100vh - 57px);
+}
+
+.left {
+  background: var(--sidebar);
+  padding: 52px 44px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  border-right: 1px solid #2e2214;
+}
+
+.leftInner {
+  max-width: 320px;
+  position: sticky;
+  top: 40px;
+}
+
+.tagline {
+  font-family: 'Georgia', serif;
+  font-size: 34px;
+  color: var(--s-text);
+  line-height: 1.25;
+  margin-bottom: 16px;
+  font-weight: normal;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--s-muted);
+  line-height: 1.8;
+  margin-bottom: 32px;
+}
+
+.tips {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tipsTitle {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--s-muted);
+  line-height: 1.6;
+}
+
+.tipDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+  margin-top: 6px;
+  opacity: 0.6;
+}
+
+.right {
+  padding: 44px 48px;
+  background: var(--parch);
+}
+
+.formBox {
+  max-width: 560px;
+}
+
+.formTitle {
+  font-family: 'Georgia', serif;
+  font-size: 26px;
+  color: var(--ink);
+  margin-bottom: 4px;
+  font-weight: normal;
+}
+
+.formSub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+
+.group {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 7px;
+  letter-spacing: 0.3px;
+}
+
+.labelHint {
+  font-size: 11px;
+  color: var(--ink-soft);
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  font-size: 13px;
+  color: var(--ink);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--gold);
+}
+
+.textarea {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  font-size: 13px;
+  color: var(--ink);
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  line-height: 1.7;
+  transition: border-color 0.15s;
+}
+
+.textarea:focus {
+  border-color: var(--gold);
+}
+
+.textareaLarge {
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.inputError {
+  border-color: var(--seal);
+}
+
+.error {
+  font-size: 11px;
+  color: var(--seal);
+  margin-top: 5px;
+  min-height: 16px;
+}
+
+.wordCountRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+
+.wordCount {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-left: auto;
+}
+
+.wordOver {
+  color: var(--seal);
+  font-weight: 500;
+}
+
+/* GENRE GRID */
+.genreGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.genreBtn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+  background: var(--card);
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.genreBtn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.genreActive {
+  background: var(--gold-pale);
+  border-color: var(--gold);
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* ACTIONS */
+.formActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btnCancel {
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  background: transparent;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.btnCancel:hover {
+  background: var(--parch-dark);
+}
+
+.btnSubmit {
+  padding: 10px 24px;
+  background: var(--ink);
+  color: var(--gold-light);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.5px;
+  transition: opacity 0.15s;
+}
+
+.btnSubmit:hover {
+  opacity: 0.85;
+}
