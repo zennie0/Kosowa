@@ -1,27 +1,38 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import Navbar from '../../components/Navbar/Navbar'
 import styles from './SignUp.module.css'
 
 const SignUp = () => {
   const navigate = useNavigate()
+  const { signUp } = useAuth()
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '' })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value })
+    setError('')
   }
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault()
-    console.log('Sign up data:', form)
-    // later this will call the backend API
+    setLoading(true)
+    try {
+      await signUp(form)
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className={styles.page}>
       <Navbar />
       <div className={styles.wrap}>
-
         <div className={styles.left}>
           <div className={styles.leftInner}>
             <div className={styles.tagline}>Start a story.<br />Let the world finish it.</div>
@@ -39,6 +50,8 @@ const SignUp = () => {
           <div className={styles.formBox}>
             <div className={styles.formTitle}>Join the circle</div>
             <div className={styles.formSub}>Create your Kōsōwa account — it's free</div>
+
+            {error && <div className={styles.errorBox}>{error}</div>}
 
             <form onSubmit={handleSubmit}>
               <div className={styles.group}>
@@ -93,7 +106,13 @@ const SignUp = () => {
                 />
               </div>
 
-              <button className={styles.submit} type="submit">Begin your story</button>
+              <button
+                className={styles.submit}
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? 'Creating account...' : 'Begin your story'}
+              </button>
             </form>
 
             <div className={styles.switch}>
@@ -102,7 +121,6 @@ const SignUp = () => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   )

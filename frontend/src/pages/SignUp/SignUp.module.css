@@ -138,3 +138,13 @@
 .switch span:hover {
   text-decoration: underline;
 }
+
+.errorBox {
+  background: #fff0f0;
+  border: 1px solid var(--seal);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--seal);
+  margin-bottom: 16px;
+}

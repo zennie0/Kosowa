@@ -1,27 +1,38 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import Navbar from '../../components/Navbar/Navbar'
 import styles from './SignIn.module.css'
 
 const SignIn = () => {
   const navigate = useNavigate()
+  const { signIn } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value })
+    setError('')
   }
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault()
-    console.log('Sign in data:', form)
-    // later this will call the backend API
+    setLoading(true)
+    try {
+      await signIn(form)
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className={styles.page}>
       <Navbar />
       <div className={styles.wrap}>
-
         <div className={styles.left}>
           <div className={styles.leftInner}>
             <div className={styles.tagline}>Every great story needs one more voice.</div>
@@ -39,6 +50,8 @@ const SignIn = () => {
           <div className={styles.formBox}>
             <div className={styles.formTitle}>Welcome back</div>
             <div className={styles.formSub}>Sign in to your Kōsōwa account</div>
+
+            {error && <div className={styles.errorBox}>{error}</div>}
 
             <form onSubmit={handleSubmit}>
               <div className={styles.group}>
@@ -67,7 +80,13 @@ const SignIn = () => {
                 />
               </div>
 
-              <button className={styles.submit} type="submit">Enter the circle</button>
+              <button
+                className={styles.submit}
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? 'Signing in...' : 'Enter the circle'}
+              </button>
             </form>
 
             <div className={styles.switch}>
@@ -76,7 +95,6 @@ const SignIn = () => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   )
