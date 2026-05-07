@@ -374,3 +374,48 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+.loadingMsg {
+  text-align: center;
+  padding: 60px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.completedNote {
+  font-size: 12px;
+  color: var(--ink-soft);
+  padding: 12px;
+  background: var(--gold-pale);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  line-height: 1.6;
+}
+
+.completedTag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: var(--gold-pale);
+  color: #8b5e1a;
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.contribError {
+  font-size: 11px;
+  color: var(--seal);
+  padding: 8px 10px;
+  background: #fff0f0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--seal);
+}
+
+.signinLink {
+  color: var(--gold);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.signinLink:hover {
+  text-decoration: underline;
+}

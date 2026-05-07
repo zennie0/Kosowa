@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from '../../components/Navbar/Navbar'
-import StoryCard from '../../components/StoryCard/StoryCard'
-import dummyStories from '../../data/dummyStories.js'
+import StoryCard from '../../components/StoryCard/StoryCard.jsx'
+import { storyAPI } from '../../services/api.js'
 import styles from './Home.module.css'
 
 const genres = ['All', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi', 'Mystery', 'Thriller', 'Folklore', 'Drama', 'Comedy', 'Adventure']
@@ -10,16 +10,47 @@ const Home = () => {
   const [activeGenre, setActiveGenre] = useState('All')
   const [search, setSearch] = useState('')
   const [searchGenre, setSearchGenre] = useState('All genres')
+  const [stories, setStories] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const filtered = dummyStories.filter(story => {
-    const matchesGenre = activeGenre === 'All' || story.genre === activeGenre
-    const matchesSearch = story.title.toLowerCase().includes(search.toLowerCase())
-    const matchesSearchGenre = searchGenre === 'All genres' || story.genre === searchGenre
-    return matchesGenre && matchesSearch && matchesSearchGenre
-  })
+  useEffect(() => {
+    fetchStories()
+  }, [])
 
-  const trending = filtered.slice(0, 6)
-  const newest = filtered.slice(6)
+  const fetchStories = async (params = {}) => {
+    setLoading(true)
+    try {
+      const data = await storyAPI.getAll(params)
+      setStories(data)
+    } catch (err) {
+      setError('Failed to load stories')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = () => {
+    const params = {}
+    if (search) params.search = search
+    if (searchGenre !== 'All genres') params.genre = searchGenre
+    fetchStories(params)
+  }
+
+  const handleGenrePill = (genre) => {
+    setActiveGenre(genre)
+    const params = {}
+    if (genre !== 'All') params.genre = genre
+    if (search) params.search = search
+    fetchStories(params)
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') handleSearch()
+  }
+
+  const trending = stories.slice(0, 6)
+  const newest = stories.slice(6)
 
   return (
     <div className={styles.page}>
@@ -37,6 +68,7 @@ const Home = () => {
             placeholder="Search stories, genres, authors..."
             value={search}
             onChange={e => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
             className={styles.searchInput}
           />
           <select
@@ -49,7 +81,7 @@ const Home = () => {
               <option key={g}>{g}</option>
             ))}
           </select>
-          <button className={styles.searchBtn}>Search</button>
+          <button className={styles.searchBtn} onClick={handleSearch}>Search</button>
         </div>
       </div>
 
@@ -58,7 +90,7 @@ const Home = () => {
           <button
             key={genre}
             className={`${styles.pill} ${activeGenre === genre ? styles.pillActive : ''}`}
-            onClick={() => setActiveGenre(genre)}
+            onClick={() => handleGenrePill(genre)}
           >
             {genre}
           </button>
@@ -66,32 +98,56 @@ const Home = () => {
       </div>
 
       <div className={styles.body}>
-        {trending.length > 0 && (
+        {loading && (
+          <div className={styles.empty}>Loading stories...</div>
+        )}
+
+        {error && (
+          <div className={styles.empty}>{error}</div>
+        )}
+
+        {!loading && !error && stories.length === 0 && (
+          <div className={styles.empty}>No stories found. Be the first to begin one!</div>
+        )}
+
+        {!loading && !error && trending.length > 0 && (
           <>
             <div className={styles.sectionTitle}>Trending now</div>
             <div className={styles.grid}>
               {trending.map(story => (
-                <StoryCard key={story.id} story={story} />
+                <StoryCard key={story._id} story={{
+                  id: story._id,
+                  title: story.title,
+                  genre: story.genre,
+                  description: story.description,
+                  author: story.owner?.username,
+                  contributors: story.contributorCount,
+                  status: story.status,
+                  createdAt: story.createdAt,
+                }} />
               ))}
             </div>
           </>
         )}
 
-        {newest.length > 0 && (
+        {!loading && !error && newest.length > 0 && (
           <>
             <div className={styles.sectionTitle}>Newest stories</div>
             <div className={styles.grid}>
               {newest.map(story => (
-                <StoryCard key={story.id} story={story} />
+                <StoryCard key={story._id} story={{
+                  id: story._id,
+                  title: story.title,
+                  genre: story.genre,
+                  description: story.description,
+                  author: story.owner?.username,
+                  contributors: story.contributorCount,
+                  status: story.status,
+                  createdAt: story.createdAt,
+                }} />
               ))}
             </div>
           </>
-        )}
-
-        {filtered.length === 0 && (
-          <div className={styles.empty}>
-            No stories found. Try a different search or genre.
-          </div>
         )}
       </div>
     </div>

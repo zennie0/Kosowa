@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar/Navbar'
 import CommentSection from '../../components/CommentSection/CommentSection'
-import { dummyStoryDetail } from '../../data/dummyStories'
+import { storyAPI, paragraphAPI } from '../../services/api'
+import { useAuth } from '../../context/authContext'
 import styles from './Story.module.css'
 
 const getInitial = (name) => name.charAt(0).toUpperCase()
@@ -14,31 +15,84 @@ const getAvatarColor = (name) => {
 }
 
 const Story = () => {
+  const { id } = useParams()
   const navigate = useNavigate()
-  const [story, setStory] = useState(dummyStoryDetail)
+  const { user } = useAuth()
+  const [story, setStory] = useState(null)
+  const [paragraphs, setParagraphs] = useState([])
   const [contribText, setContribText] = useState('')
+  const [quota, setQuota] = useState({ used: 0, limit: 5, remaining: 5 })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [contribError, setContribError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const wordCount = contribText.trim() === '' ? 0 : contribText.trim().split(/\s+/).length
 
-  const handleContribute = () => {
+  useEffect(() => {
+    fetchStory()
+  }, [id])
+
+  useEffect(() => {
+    if (user && story) fetchQuota()
+  }, [user, story])
+
+  const fetchStory = async () => {
+    setLoading(true)
+    try {
+      const data = await storyAPI.getById(id)
+      setStory(data.story)
+      setParagraphs(data.paragraphs)
+    } catch (err) {
+      setError('Story not found')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchQuota = async () => {
+    try {
+      const data = await paragraphAPI.getQuota(id)
+      setQuota(data)
+    } catch (err) {
+      console.error('Quota fetch failed', err)
+    }
+  }
+
+  const handleContribute = async () => {
+    if (!user) return navigate('/signin')
     if (contribText.trim() === '') return
     if (wordCount > 200) return
 
-    const newPara = {
-      id: `p${Date.now()}`,
-      author: 'zainab',
-      isOwner: false,
-      text: contribText.trim(),
-      createdAt: 'just now',
+    setSubmitting(true)
+    setContribError('')
+    try {
+      const newPara = await paragraphAPI.add(id, contribText.trim())
+      setParagraphs(prev => [...prev, newPara])
+      setContribText('')
+      fetchQuota()
+    } catch (err) {
+      setContribError(err.message)
+    } finally {
+      setSubmitting(false)
     }
-
-    setStory(prev => ({
-      ...prev,
-      paragraphs: [...prev.paragraphs, newPara],
-    }))
-
-    setContribText('')
   }
+
+  if (loading) return (
+    <div className={styles.page}>
+      <Navbar />
+      <div className={styles.loadingMsg}>Loading story...</div>
+    </div>
+  )
+
+  if (error) return (
+    <div className={styles.page}>
+      <Navbar />
+      <div className={styles.loadingMsg}>{error}</div>
+    </div>
+  )
+
+  const isOwner = user && story.owner._id === user.id
 
   return (
     <div className={styles.page}>
@@ -49,30 +103,55 @@ const Story = () => {
         <div className={styles.left}>
           <div className={styles.leftTitle}>Contribute</div>
 
-          <div className={styles.contribBox}>
-            <textarea
-              className={styles.contribTextarea}
-              placeholder="Continue the story... (max 200 words)"
-              value={contribText}
-              onChange={e => setContribText(e.target.value)}
-            />
-            <div className={styles.contribFooter}>
-              <span className={`${styles.wordCount} ${wordCount > 200 ? styles.wordOver : ''}`}>
-                {wordCount} / 200 words
-              </span>
-              <button
-                className={styles.btnContribute}
-                onClick={handleContribute}
-                disabled={wordCount > 200 || contribText.trim() === ''}
-              >
-                Add paragraph
-              </button>
+          {story.status === 'completed' ? (
+            <div className={styles.completedNote}>
+              This story has been completed by the owner and is no longer accepting contributions.
             </div>
-          </div>
+          ) : (
+            <>
+              <div className={styles.contribBox}>
+                <textarea
+                  className={styles.contribTextarea}
+                  placeholder={user ? 'Continue the story... (max 200 words)' : 'Sign in to contribute...'}
+                  value={contribText}
+                  onChange={e => setContribText(e.target.value)}
+                  disabled={!user || submitting}
+                />
+                <div className={styles.contribFooter}>
+                  <span className={`${styles.wordCount} ${wordCount > 200 ? styles.wordOver : ''}`}>
+                    {wordCount} / 200 words
+                  </span>
+                  <button
+                    className={styles.btnContribute}
+                    onClick={handleContribute}
+                    disabled={wordCount > 200 || contribText.trim() === '' || submitting}
+                  >
+                    {submitting ? 'Adding...' : 'Add paragraph'}
+                  </button>
+                </div>
+              </div>
 
-          <div className={styles.quotaNote}>
-            You have used 3 of 5 paragraphs today for this story.
-          </div>
+              {contribError && <div className={styles.contribError}>{contribError}</div>}
+
+              {user && !isOwner && (
+                <div className={styles.quotaNote}>
+                  You have used {quota.used} of {quota.limit} paragraphs today for this story.
+                </div>
+              )}
+
+              {!user && (
+                <div className={styles.quotaNote}>
+                  <span
+                    className={styles.signinLink}
+                    onClick={() => navigate('/signin')}
+                  >
+                    Sign in
+                  </span>{' '}
+                  to contribute to this story.
+                </div>
+              )}
+            </>
+          )}
 
           <div className={styles.infoBox}>
             <div className={styles.infoLabel}>Genre</div>
@@ -99,33 +178,38 @@ const Story = () => {
               Started by{' '}
               <span
                 className={styles.authorLink}
-                onClick={() => navigate(`/profile/${story.author}`)}
+                onClick={() => navigate(`/profile/${story.owner.username}`)}
               >
-                @{story.author}
+                @{story.owner.username}
               </span>
-              {' '}· {story.paragraphs.length} paragraphs · {story.contributors} contributors
+              {' '}· {paragraphs.length} paragraphs · {story.contributorCount} contributors
+              {story.status === 'completed' && (
+                <span className={styles.completedTag}>Completed</span>
+              )}
             </div>
           </div>
 
           <div className={styles.paragraphs}>
-            {story.paragraphs.map((para, index) => (
+            {paragraphs.map((para, index) => (
               <div
-                key={para.id}
-                className={`${styles.paraBlock} ${index === story.paragraphs.length - 1 && para.createdAt === 'just now' ? styles.paraNew : ''}`}
+                key={para._id}
+                className={`${styles.paraBlock} ${index === paragraphs.length - 1 && para.createdAt === 'just now' ? styles.paraNew : ''}`}
               >
                 <div className={styles.paraAuthor}>
                   <div
                     className={styles.paraAvatar}
-                    style={{ background: getAvatarColor(para.author) }}
+                    style={{ background: getAvatarColor(para.author.username) }}
                   >
-                    {getInitial(para.author)}
+                    {getInitial(para.author.username)}
                   </div>
                   <div>
                     <div className={styles.paraName}>
-                      @{para.author}
-                      {para.isOwner && <span className={styles.ownerTag}>Owner</span>}
+                      @{para.author.username}
+                      {para.isOwnerParagraph && <span className={styles.ownerTag}>Owner</span>}
                     </div>
-                    <div className={styles.paraTime}>{para.createdAt}</div>
+                    <div className={styles.paraTime}>
+                      {new Date(para.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
                 </div>
                 <p className={styles.paraText}>{para.text}</p>
@@ -137,9 +221,9 @@ const Story = () => {
         {/* RIGHT — COMMENTS */}
         <div className={styles.right}>
           <CommentSection
-            comments={story.comments}
-            currentUser="zainab"
-            isOwner={story.author === 'zainab'}
+            storyId={id}
+            currentUser={user?.username}
+            isOwner={isOwner}
           />
         </div>
 
@@ -149,4 +233,3 @@ const Story = () => {
 }
 
 export default Story
-//des

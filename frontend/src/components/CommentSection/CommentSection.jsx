@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import {commentAPI} from '../../services/api'
 import styles from './CommentSection.module.css'
 
 const getInitial = (name) => name.charAt(0).toUpperCase()
@@ -219,44 +220,63 @@ const Comment = ({ comment, currentUser, isOwner, onDelete, onReply }) => {
   )
 }
 
-const CommentSection = ({ comments: initialComments, currentUser, isOwner }) => {
-  const [comments, setComments] = useState(initialComments)
+const CommentSection = ({ storyId, currentUser, isOwner }) => {
+  const [comments, setComments] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const handleAddComment = (text) => {
-    const newComment = {
-      id: `c${Date.now()}`,
-      author: currentUser,
-      text,
-      createdAt: 'just now',
-      replies: [],
+  useEffect(() => {
+    fetchComments()
+  }, [storyId])
+
+  const fetchComments = async () => {
+    try {
+      const data = await commentAPI.getAll(storyId)
+      setComments(data)
+    } catch (err) {
+      console.error('Failed to fetch comments', err)
+    } finally {
+      setLoading(false)
     }
-    setComments(prev => [newComment, ...prev])
   }
 
-  const handleDelete = (commentId, replyId = null) => {
-    if (replyId) {
+  const handleAddComment = async (text) => {
+    try {
+      const newComment = await commentAPI.add(storyId, text)
+      setComments(prev => [newComment, ...prev])
+    } catch (err) {
+      console.error('Failed to add comment', err)
+    }
+  }
+
+  const handleDelete = async (commentId, replyId = null) => {
+    try {
+      if (replyId) {
+        await commentAPI.deleteReply(commentId, replyId)
+        setComments(prev => prev.map(c =>
+          c.id === commentId
+            ? { ...c, replies: c.replies.filter(r => r.id !== replyId) }
+            : c
+        ))
+      } else {
+        await commentAPI.delete(commentId)
+        setComments(prev => prev.filter(c => c._id !== commentId))
+      }
+    } catch (err) {
+      console.error('Failed to delete', err)
+    }
+  }
+
+  const handleReply = async (commentId, text) => {
+    try {
+      const newReply = await commentAPI.addReply(commentId, text)
       setComments(prev => prev.map(c =>
-        c.id === commentId
-          ? { ...c, replies: c.replies.filter(r => r.id !== replyId) }
+        c._id === commentId
+          ? { ...c, replies: [...(c.replies || []), newReply] }
           : c
       ))
-    } else {
-      setComments(prev => prev.filter(c => c.id !== commentId))
+    } catch (err) {
+      console.error('Failed to add reply', err)
     }
-  }
-
-  const handleReply = (commentId, text) => {
-    const newReply = {
-      id: `r${Date.now()}`,
-      author: currentUser,
-      text,
-      createdAt: 'just now',
-    }
-    setComments(prev => prev.map(c =>
-      c.id === commentId
-        ? { ...c, replies: [...(c.replies || []), newReply] }
-        : c
-    ))
   }
 
   return (
@@ -265,23 +285,36 @@ const CommentSection = ({ comments: initialComments, currentUser, isOwner }) => 
 
       <CommentInput onSubmit={handleAddComment} />
 
+      {loading && <div className={styles.empty}>Loading comments...</div>}
+
       <div className={styles.list}>
-        {comments.map(comment => (
+        {!loading && comments.map(comment => (
           <Comment
-            key={comment.id}
-            comment={comment}
+            key={comment._id}
+            comment={{
+              ...comment,
+              id: comment._id,
+              author: comment.author?.username,
+              replies: (comment.replies || []).map(r => ({
+                ...r,
+                id: r._id,
+                author: r.author?.username,
+              }))
+            }}
             currentUser={currentUser}
             isOwner={isOwner}
             onDelete={handleDelete}
             onReply={handleReply}
           />
         ))}
-        {comments.length === 0 && (
+        {!loading && comments.length === 0 && (
           <div className={styles.empty}>No comments yet. Be the first!</div>
         )}
       </div>
     </div>
   )
 }
+
+
 
 export default CommentSection
