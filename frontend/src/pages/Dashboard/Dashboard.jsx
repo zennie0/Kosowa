@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar/Navbar'
 import StoryCard from '../../components/StoryCard/StoryCard'
-import { dummyDashboard } from '../../data/dummyStories'
+import { storyAPI, notificationAPI } from '../../services/api'
+import { useAuth } from '../../context/authContext'
 import styles from './Dashboard.module.css'
 
 const getInitial = (name) => name.charAt(0).toUpperCase()
@@ -15,37 +16,62 @@ const getAvatarColor = (name) => {
 
 const Dashboard = () => {
   const navigate = useNavigate()
-  const data = dummyDashboard
-  const [notifications, setNotifications] = useState(data.notifications)
+  const { user } = useAuth()
+  const [myStories, setMyStories] = useState([])
+  const [notifications, setNotifications] = useState([])
   const [showNotifs, setShowNotifs] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const unreadCount = notifications.filter(n => !n.read).length
+  useEffect(() => {
+    if (!user) return navigate('/signin')
+    fetchData()
+  }, [user])
 
-  const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+      const [storiesData, notifsData] = await Promise.all([
+        storyAPI.getMine(),
+        notificationAPI.getAll(),
+      ])
+      setMyStories(storiesData)
+      setNotifications(notifsData)
+    } catch (err) {
+      console.error('Failed to fetch dashboard data', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const totalContributors = data.myStories.reduce((sum, s) => sum + s.contributors, 0)
-  const totalMyParagraphs = data.contributedStories.reduce((sum, s) => sum + s.myParagraphs, 0)
+  const markAllRead = async () => {
+    try {
+      await notificationAPI.markAllRead()
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    } catch (err) {
+      console.error('Failed to mark all read', err)
+    }
+  }
+
+  const unreadCount = notifications.filter(n => !n.read).length
+  const totalContributors = myStories.reduce((sum, s) => sum + (s.contributorCount || 0), 0)
+  const completedCount = myStories.filter(s => s.status === 'completed').length
 
   return (
     <div className={styles.page}>
       <Navbar />
 
-      {/* PROFILE HEADER */}
       <div className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.headerLeft}>
             <div
               className={styles.avatar}
-              style={{ background: getAvatarColor(data.name) }}
+              style={{ background: getAvatarColor(user?.name || 'U') }}
             >
-              {getInitial(data.name)}
+              {getInitial(user?.name || 'U')}
             </div>
             <div className={styles.info}>
-              <h1 className={styles.name}>{data.name}</h1>
-              <div className={styles.handle}>@{data.username} · Member since {data.joinedAt}</div>
-              <p className={styles.bio}>{data.bio}</p>
+              <h1 className={styles.name}>{user?.name}</h1>
+              <div className={styles.handle}>@{user?.username}</div>
             </div>
           </div>
 
@@ -75,15 +101,22 @@ const Dashboard = () => {
                     )}
                   </div>
                   <div className={styles.notifList}>
+                    {notifications.length === 0 && (
+                      <div style={{ padding: '16px', fontSize: '12px', color: 'var(--ink-soft)' }}>
+                        No notifications yet
+                      </div>
+                    )}
                     {notifications.map(n => (
                       <div
-                        key={n.id}
+                        key={n._id}
                         className={`${styles.notifItem} ${!n.read ? styles.notifUnread : ''}`}
                       >
                         <div className={styles.notifDot} style={{ opacity: n.read ? 0 : 1 }} />
                         <div className={styles.notifContent}>
                           <div className={styles.notifMsg}>{n.message}</div>
-                          <div className={styles.notifTime}>{n.createdAt}</div>
+                          <div className={styles.notifTime}>
+                            {new Date(n.createdAt).toLocaleDateString()}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -101,12 +134,11 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* STATS */}
         <div className={styles.stats}>
           <div className={styles.statCard}>
             <div className={styles.statLabel}>Stories started</div>
-            <div className={styles.statVal}>{data.myStories.length}</div>
-            <div className={styles.statSub}>{data.myStories.filter(s => s.status === 'completed').length} completed</div>
+            <div className={styles.statVal}>{myStories.length}</div>
+            <div className={styles.statSub}>{completedCount} completed</div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statLabel}>Total contributors</div>
@@ -114,56 +146,55 @@ const Dashboard = () => {
             <div className={styles.statSub}>across all stories</div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statLabel}>My paragraphs</div>
-            <div className={styles.statVal}>{totalMyParagraphs}</div>
-            <div className={styles.statSub}>in other stories</div>
+            <div className={styles.statLabel}>Notifications</div>
+            <div className={styles.statVal}>{notifications.length}</div>
+            <div className={styles.statSub}>{unreadCount} unread</div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statLabel}>Today's quota</div>
-            <div className={styles.statVal}>3 / 5</div>
-            <div className={styles.statSub}>paragraphs left today</div>
+            <div className={styles.statLabel}>Member since</div>
+            <div className={styles.statVal} style={{ fontSize: '16px', marginTop: '4px' }}>
+              {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : '—'}
+            </div>
+            <div className={styles.statSub}>Kōsōwa member</div>
           </div>
         </div>
       </div>
 
       <div className={styles.body}>
-
-        {/* MY STORIES */}
         <div className={styles.section}>
           <div className={styles.sectionTitle}>Stories I started</div>
-          <div className={styles.grid}>
-            {data.myStories.map(story => (
-              <div key={story.id} onClick={() => navigate(`/mystory/${story.id}`)}>
-                <StoryCard story={story} />
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* CONTRIBUTED TO */}
-        <div className={styles.section}>
-          <div className={styles.sectionTitle}>Stories I contributed to</div>
-          <div className={styles.contribGrid}>
-            {data.contributedStories.map(story => (
-              <div
-                key={story.id}
-                className={styles.contribCard}
-                onClick={() => navigate(`/story/${story.id}`)}
+          {loading && <div style={{ color: 'var(--ink-soft)', fontSize: '14px' }}>Loading...</div>}
+
+          {!loading && myStories.length === 0 && (
+            <div style={{ color: 'var(--ink-soft)', fontSize: '14px' }}>
+              You haven't started any stories yet.{' '}
+              <span
+                style={{ color: 'var(--gold)', cursor: 'pointer' }}
+                onClick={() => navigate('/story/new')}
               >
-                <div className={styles.contribGenre}>{story.genre}</div>
-                <div className={styles.contribTitle}>{story.title}</div>
-                <div className={styles.contribBy}>by @{story.author}</div>
-                <div className={styles.contribFooter}>
-                  <span className={styles.contribMeta}>
-                    {story.myParagraphs} paragraph{story.myParagraphs > 1 ? 's' : ''} by you
-                  </span>
-                  <span className={styles.contribTime}>Last: {story.lastContributed}</span>
-                </div>
+                Begin one now!
+              </span>
+            </div>
+          )}
+
+          <div className={styles.grid}>
+            {myStories.map(story => (
+              <div key={story._id} onClick={() => navigate(`/mystory/${story._id}`)}>
+                <StoryCard story={{
+                  id: story._id,
+                  title: story.title,
+                  genre: story.genre,
+                  description: story.description,
+                  author: user?.username,
+                  contributors: story.contributorCount,
+                  status: story.status,
+                  createdAt: story.createdAt,
+                }} />
               </div>
             ))}
           </div>
         </div>
-
       </div>
     </div>
   )
