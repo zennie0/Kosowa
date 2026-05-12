@@ -1,7 +1,8 @@
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar/Navbar'
 import StoryCard from '../../components/StoryCard/StoryCard'
-import { dummyProfile } from '../../data/dummyStories'
+import { storyAPI } from '../../services/api'
 import styles from './Profile.module.css'
 
 const getInitial = (name) => name.charAt(0).toUpperCase()
@@ -13,8 +14,45 @@ const getAvatarColor = (name) => {
 }
 
 const Profile = () => {
+  const { username } = useParams()
   const navigate = useNavigate()
-  const profile = dummyProfile
+  const [profile, setProfile] = useState(null)
+  const [stories, setStories] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetchProfile()
+  }, [username])
+
+  const fetchProfile = async () => {
+    setLoading(true)
+    try {
+      const data = await storyAPI.getProfile(username)
+      setProfile(data.user)
+      setStories(data.stories)
+    } catch (err) {
+      setError('User not found')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) return (
+    <div style={{ background: 'var(--parch)', minHeight: '100vh' }}>
+      <Navbar />
+      <div style={{ textAlign: 'center', padding: '60px', color: 'var(--ink-soft)' }}>Loading profile...</div>
+    </div>
+  )
+
+  if (error) return (
+    <div style={{ background: 'var(--parch)', minHeight: '100vh' }}>
+      <Navbar />
+      <div style={{ textAlign: 'center', padding: '60px', color: 'var(--ink-soft)' }}>{error}</div>
+    </div>
+  )
+
+  const totalContributors = stories.reduce((sum, s) => sum + (s.contributorCount || 0), 0)
 
   return (
     <div className={styles.page}>
@@ -31,23 +69,20 @@ const Profile = () => {
 
           <div className={styles.info}>
             <h1 className={styles.name}>{profile.name}</h1>
-            <div className={styles.handle}>@{profile.username} · Member since {profile.joinedAt}</div>
-            <p className={styles.bio}>{profile.bio}</p>
+            <div className={styles.handle}>
+              @{profile.username} · Member since{' '}
+              {new Date(profile.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+            </div>
           </div>
 
           <div className={styles.stats}>
             <div className={styles.stat}>
-              <div className={styles.statVal}>{profile.stories.length}</div>
+              <div className={styles.statVal}>{stories.length}</div>
               <div className={styles.statLabel}>Stories</div>
             </div>
             <div className={styles.statDivider} />
             <div className={styles.stat}>
-              <div className={styles.statVal}>{profile.totalParagraphsWritten}</div>
-              <div className={styles.statLabel}>Paragraphs written</div>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}>
-              <div className={styles.statVal}>{profile.totalContributors}</div>
+              <div className={styles.statVal}>{totalContributors}</div>
               <div className={styles.statLabel}>Total contributors</div>
             </div>
           </div>
@@ -58,17 +93,27 @@ const Profile = () => {
         <div className={styles.sectionTitle}>
           Stories by @{profile.username}
         </div>
-        <div className={styles.grid}>
-          {profile.stories.map(story => (
-            <StoryCard key={story.id} story={story} />
-          ))}
-        </div>
 
-        {profile.stories.length === 0 && (
+        {stories.length === 0 && (
           <div className={styles.empty}>
             This user hasn't started any stories yet.
           </div>
         )}
+
+        <div className={styles.grid}>
+          {stories.map(story => (
+            <StoryCard key={story._id} story={{
+              id: story._id,
+              title: story.title,
+              genre: story.genre,
+              description: story.description,
+              author: profile.username,
+              contributors: story.contributorCount,
+              status: story.status,
+              createdAt: story.createdAt,
+            }} />
+          ))}
+        </div>
       </div>
     </div>
   )

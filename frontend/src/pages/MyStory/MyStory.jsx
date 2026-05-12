@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar/Navbar'
-import { dummyMyStory } from '../../data/dummyStories'
+import { storyAPI, paragraphAPI } from '../../services/api'
+import { useAuth } from '../../context/authContext.jsx'
 import styles from './MyStory.module.css'
 
 const getInitial = (name) => name.charAt(0).toUpperCase()
@@ -13,27 +14,84 @@ const getAvatarColor = (name) => {
 }
 
 const MyStory = () => {
+  const { id } = useParams()
   const navigate = useNavigate()
-  const [story, setStory] = useState(dummyMyStory)
-  const [completed, setCompleted] = useState(false)
+  const { user } = useAuth()
+  const [story, setStory] = useState(null)
+  const [paragraphs, setParagraphs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [showConfirmComplete, setShowConfirmComplete] = useState(false)
 
-  const handleDeletePara = (paraId) => {
-    setStory(prev => ({
-      ...prev,
-      paragraphs: prev.paragraphs.filter(p => p.id !== paraId),
-    }))
+  useEffect(() => {
+    if (!user) return navigate('/signin')
+    fetchStory()
+  }, [id, user])
+
+  const fetchStory = async () => {
+    setLoading(true)
+    try {
+      const data = await storyAPI.getById(id)
+      if (data.story.owner._id !== user.id) {
+        return navigate('/')
+      }
+      setStory(data.story)
+      setParagraphs(data.paragraphs)
+    } catch (err) {
+      setError('Story not found')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleComplete = () => {
-    setCompleted(true)
-    setShowConfirmComplete(false)
+  const handleDeletePara = async (paraId) => {
+    try {
+      await paragraphAPI.delete(paraId)
+      setParagraphs(prev => prev.filter(p => p._id !== paraId))
+    } catch (err) {
+      console.error('Failed to delete paragraph', err)
+    }
   }
 
-  const handleDeleteStory = () => {
-    navigate('/')
+  const handleComplete = async () => {
+    try {
+      const updated = await storyAPI.complete(id)
+      setStory(updated)
+      setShowConfirmComplete(false)
+    } catch (err) {
+      console.error('Failed to complete story', err)
+    }
   }
+
+  const handleDeleteStory = async () => {
+    try {
+      await storyAPI.delete(id)
+      navigate('/dashboard')
+    } catch (err) {
+      console.error('Failed to delete story', err)
+    }
+  }
+
+  const contributors = [...new Map(
+    paragraphs
+      .filter(p => !p.isOwnerParagraph)
+      .map(p => [p.author._id, p.author])
+  ).values()]
+
+  if (loading) return (
+    <div style={{ background: 'var(--parch)', minHeight: '100vh' }}>
+      <Navbar />
+      <div style={{ textAlign: 'center', padding: '60px', color: 'var(--ink-soft)' }}>Loading...</div>
+    </div>
+  )
+
+  if (error) return (
+    <div style={{ background: 'var(--parch)', minHeight: '100vh' }}>
+      <Navbar />
+      <div style={{ textAlign: 'center', padding: '60px', color: 'var(--ink-soft)' }}>{error}</div>
+    </div>
+  )
 
   return (
     <div className={styles.page}>
@@ -42,16 +100,18 @@ const MyStory = () => {
       <div className={styles.header}>
         <div className={styles.headerTop}>
           <div className={styles.genreTag}>{story.genre}</div>
-          {completed && <span className={styles.completedBadge}>Completed</span>}
+          {story.status === 'completed' && (
+            <span className={styles.completedBadge}>Completed</span>
+          )}
         </div>
         <h1 className={styles.title}>{story.title}</h1>
         <div className={styles.meta}>
-          Started {story.createdAt} · {story.paragraphs.length} paragraphs · {story.contributors.length} contributors
+          Started {new Date(story.createdAt).toLocaleDateString()} · {paragraphs.length} paragraphs · {contributors.length} contributors
         </div>
         <p className={styles.desc}>{story.description}</p>
 
         <div className={styles.actions}>
-          {!completed && (
+          {story.status !== 'completed' && (
             <button
               className={styles.btnComplete}
               onClick={() => setShowConfirmComplete(true)}
@@ -68,7 +128,6 @@ const MyStory = () => {
         </div>
       </div>
 
-      {/* CONFIRM COMPLETE MODAL */}
       {showConfirmComplete && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -82,7 +141,6 @@ const MyStory = () => {
         </div>
       )}
 
-      {/* CONFIRM DELETE MODAL */}
       {showConfirmDelete && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -97,31 +155,33 @@ const MyStory = () => {
       )}
 
       <div className={styles.body}>
-
-        {/* PARAGRAPHS */}
         <div className={styles.paraSection}>
           <div className={styles.sectionLabel}>All paragraphs</div>
           <div className={styles.paraList}>
-            {story.paragraphs.map(para => (
-              <div key={para.id} className={styles.paraItem}>
+            {paragraphs.map(para => (
+              <div key={para._id} className={styles.paraItem}>
                 <div className={styles.paraHead}>
                   <div
                     className={styles.paraAvatar}
-                    style={{ background: getAvatarColor(para.author) }}
+                    style={{ background: getAvatarColor(para.author.username) }}
                   >
-                    {getInitial(para.author)}
+                    {getInitial(para.author.username)}
                   </div>
                   <div>
                     <div className={styles.paraName}>
-                      @{para.author}
-                      {para.isOwner && <span className={styles.ownerTag}>You · Owner</span>}
+                      @{para.author.username}
+                      {para.isOwnerParagraph && (
+                        <span className={styles.ownerTag}>You · Owner</span>
+                      )}
                     </div>
-                    <div className={styles.paraTime}>{para.createdAt}</div>
+                    <div className={styles.paraTime}>
+                      {new Date(para.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
-                  {!para.isOwner && (
+                  {!para.isOwnerParagraph && (
                     <button
                       className={styles.btnDelete}
-                      onClick={() => handleDeletePara(para.id)}
+                      onClick={() => handleDeletePara(para._id)}
                     >
                       Delete
                     </button>
@@ -133,26 +193,30 @@ const MyStory = () => {
           </div>
         </div>
 
-        {/* CONTRIBUTORS */}
         <div className={styles.writersPanel}>
           <div className={styles.writersTitle}>Contributors</div>
           <div className={styles.writersList}>
-            {story.contributors.map(c => (
-              <div key={c.author} className={styles.writerRow}>
+            {contributors.length === 0 && (
+              <div style={{ fontSize: '12px', color: 'var(--ink-soft)' }}>
+                No contributors yet.
+              </div>
+            )}
+            {contributors.map(c => (
+              <div key={c._id} className={styles.writerRow}>
                 <div
                   className={styles.writerAvatar}
-                  style={{ background: getAvatarColor(c.author) }}
+                  style={{ background: getAvatarColor(c.username) }}
                 >
-                  {getInitial(c.author)}
+                  {getInitial(c.username)}
                 </div>
-                <span className={styles.writerName}>@{c.author}</span>
-                <span className={styles.writerCount}>{c.count} para</span>
-                {c.isNew && <span className={styles.writerNew}>New</span>}
+                <span className={styles.writerName}>@{c.username}</span>
+                <span className={styles.writerCount}>
+                  {paragraphs.filter(p => p.author._id === c._id).length} para
+                </span>
               </div>
             ))}
           </div>
         </div>
-
       </div>
     </div>
   )

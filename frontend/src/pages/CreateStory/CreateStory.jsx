@@ -1,8 +1,12 @@
-import { useState } from 'react'
+
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar/Navbar'
 import styles from './CreateStory.module.css'
+import { useAuth } from '../../context/authContext.jsx'
 
+
+import { storyAPI } from '../../services/api'
 const genres = [
   'Fantasy', 'Horror', 'Romance', 'Sci-Fi',
   'Mystery', 'Thriller', 'Folklore', 'Drama',
@@ -17,8 +21,9 @@ const CreateStory = () => {
     description: '',
     firstParagraph: '',
   })
+  const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
-
+const { user } = useAuth()
   const wordCount = form.firstParagraph.trim() === ''
     ? 0
     : form.firstParagraph.trim().split(/\s+/).length
@@ -38,17 +43,26 @@ const CreateStory = () => {
     return newErrors
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const newErrors = validate()
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-    console.log('New story:', form)
-    // later this will call the backend API
-    navigate('/')
+  const handleSubmit = async (e) => {
+  e.preventDefault()
+  const newErrors = validate()
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors)
+    return
   }
+  setLoading(true)
+  try {
+    await storyAPI.create(form)
+    navigate('/dashboard')
+  } catch (err) {
+    setErrors({ title: err.message })
+  } finally {
+    setLoading(false)
+  }
+}
+useEffect(() => {
+  if (!user) navigate('/signin')
+}, [user])
 
   return (
     <div className={styles.page}>
@@ -169,8 +183,9 @@ const CreateStory = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className={styles.btnSubmit}>
-                  Begin the story
+                
+                <button type="submit" className={styles.btnSubmit} disabled={loading}>
+                {loading ? 'Creating story...' : 'Begin the story'}
                 </button>
               </div>
 
