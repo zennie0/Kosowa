@@ -1,5 +1,6 @@
-const BASE_URL = 'http://localhost:5000/api'
 
+const BASE_URL =
+  (import.meta.env.VITE_BACKEND_URL || 'https://kosowa.onrender.com') + '/api'
 const getToken = () => localStorage.getItem('kosowa_token')
 
 const headers = (auth = false) => {
